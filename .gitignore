@@ -1,5 +1,6 @@
-.cache
 .env
+.cache
+oldreadme.md
+artist_info.json
 testing_code.txt
 tempCodeRunnerFile.py
-oldreadme.md
