@@ -1,15 +1,9 @@
 import os
 import json
-import base64
 import spotipy
-import requests
-import urllib.parse
 from time import sleep
 from dotenv import load_dotenv
-import xml.etree.ElementTree as ET
 from spotipy.oauth2 import SpotifyOAuth
-from datetime import datetime, timedelta
-from flask import Flask, redirect, request, jsonify, session
 
 # Loads environment variables
 load_dotenv()
@@ -31,13 +25,13 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
                                                scope=scope))
 
 
+
 ############## Testing ##############
+
 def filter_json():
     timestamp = "timestamp"
     context = "context"
     pass
-
-
 
     # Create a new dictionary with only the desired keys
     filtered_data = {
@@ -47,7 +41,9 @@ def filter_json():
 
     # Convert the filtered data dictionary back to a JSON string
     print(json.dumps(filtered_data, indent=4))
+
 ############## Testing ##############
+
 
 
 # Gets artist from text 
@@ -64,10 +60,7 @@ def get_artists_from_txt_file():
 
     return artist_list
 
-
-
-
-
+# Creates dictionary with artist and artist id as key value pairs
 def create_artist_dict(artist_list):
     # Initialize an empty dictionary
     artist_dict = {}
@@ -87,6 +80,7 @@ def create_artist_dict(artist_list):
 
     return artist_dict
 
+# Creates dictionary with artist and artist top 10 tracks as key value pairs
 def create_artist_tracks_dict(artist_dict):
 
     # Initialize an empty dictionary
@@ -118,6 +112,7 @@ def create_artist_tracks_dict(artist_dict):
 
     return artist_tracks_dict
 
+# Converts all tracks to iterable python list
 def tracks_dict_to_list(tracks):
     total_tracks = []
 
@@ -125,6 +120,7 @@ def tracks_dict_to_list(tracks):
 
     return total_tracks
 
+# Creates playlist with user specified name
 def create_playlist(name):
 
     # Create playlist
@@ -135,6 +131,7 @@ def create_playlist(name):
     # Returns playlist id
     return value['id']
 
+# Adds tracks to playlist
 def add_tracks_to_playlist(playlist_id, list_tracks):    
     n = 0
     batch_size = 100
@@ -144,7 +141,10 @@ def add_tracks_to_playlist(playlist_id, list_tracks):
         n += batch_size
 
 
+
+# Main
 if __name__ == '__main__':
+
     artist_list = get_artists_from_txt_file()
     print(artist_list, '\n')
 
@@ -163,5 +163,3 @@ if __name__ == '__main__':
     add_tracks_to_playlist(playlist_id, tracks_list)   
     print("added tracks to playlist!\n")
     
-
-
