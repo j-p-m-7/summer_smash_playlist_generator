@@ -1,6 +1,7 @@
 import os
 import json
 import spotipy
+import requests
 from time import sleep
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
@@ -8,10 +9,16 @@ from spotipy.oauth2 import SpotifyOAuth
 # Loads environment variables
 load_dotenv()
 
-# Gets App information from .env
+# Gets Spotify credentials from .env
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
+
+# Gets Setlist credentials from .env
+API_KEY = os.getenv('API_KEY')
+
+# Sets Setlist URL
+BASE_URL = "https://api.setlist.fm/rest/"
 
 # Sets user scopes
 #scopes = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-follow-modify user-follow-read user-read-playback-position user-top-read user-read-recently-played user-library-modify user-library-read user-read-email user-read-private user-soa-link user-soa-unlink soa-manage-entitlements soa-manage-partner soa-create-partner"
@@ -45,6 +52,10 @@ def filter_json():
 ############## Testing ##############
 
 
+
+
+
+### Spotify API ###
 
 # Gets artist from text 
 def get_artists_from_txt_file():
@@ -140,11 +151,8 @@ def add_tracks_to_playlist(playlist_id, list_tracks):
         sp.playlist_add_items(playlist_id, list_tracks[n:n+batch_size])
         n += batch_size
 
-
-
-# Main
-if __name__ == '__main__':
-
+# Runs all relevant Spotify API functions
+def create_spotify_api_playlist():
     artist_list = get_artists_from_txt_file()
     print(artist_list, '\n')
 
@@ -162,4 +170,56 @@ if __name__ == '__main__':
     
     add_tracks_to_playlist(playlist_id, tracks_list)   
     print("added tracks to playlist!\n")
+
+
+
+
+
+
+
+### Setlist API ###
+
+# Gets artist
+def get_artist(artist_name):
+    url = BASE_URL + '1.0/search/artists'
+
+    params = {
+        #'artistName': artist_name,
+        'artistMbid': 'e4a51f17-a57b-47b1-b37b-f552d0f8e9e6',
+        'p': '1',
+        'sort': 'sortName'
+    }
+
+    headers = {
+        'Accept': 'application/json',
+        'x-api-key': API_KEY
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    return response.json()
+
+
+
+# Runs all relevant Setlist API functions
+def create_setlist_api_playlist():
+
+    # Creates playlist with user specified name
+    playlist_id = create_playlist("Summer Smash - Setlist API")
+    print("created playlist...\n")
+
+# Main
+if __name__ == '__main__':
+
+    # create_spotify_api_playlist()
+    # create_setlist_api_playlist()
+
+    artist_list = get_artists_from_txt_file()
+
+    print(artist_list, '\n')
+
+    artist = get_artist(artist_list[0])
+
+    print(json.dumps(artist, indent=4))
+
     
