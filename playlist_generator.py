@@ -447,6 +447,14 @@ if __name__ == '__main__':
     conflicts = []
     index = 1
 
+    # Handles edge cases
+    known_tracks = {
+    "BEEN BALLIN": "spotify:track:2EK77Jcm0Pvzd5nonAYOHX",
+    "OFF THE GRID": "spotify:track:2EK77Jcm0Pvzd5nonAYOHX",
+    "MISS THE RAGE": "spotify:track:2EK77Jcm0Pvzd5nonAYOHX",
+    # Add more known tracks here
+}
+
     for artist_name, tracks in artist_tracks_dict.items():
 
         not_found_tracks = []
@@ -467,9 +475,12 @@ if __name__ == '__main__':
 
                 
                 # I disavow this if statement logic:
-                if query_2.lower() == "been ballin' chief keef":
-                    value = sp.search(q='Been Ballin Ballout',offset=0, type="track")
-                            
+                if normalize(queried_song) in known_tracks:
+                    uri = known_tracks[normalize(queried_song)]
+                    uris_list.append(uri)
+                    tracks_list.append(queried_song)
+                    continue
+                        
                 else:
                     ######################## Which is better??? ########################
 
@@ -489,6 +500,7 @@ if __name__ == '__main__':
                     returned_song = value["tracks"]["items"][i]["name"]
                     #print(returned_song)
 
+
                     if normalize(queried_song) in normalize(returned_song):
                         
                         #print("Queried Song: ", queried_song, "\nReturned Song: ", returned_song,'\n')
@@ -497,7 +509,9 @@ if __name__ == '__main__':
                         track_artist_info = value["tracks"]["items"][i]["artists"]
                         list_of_artists = [artist["name"].upper() for artist in track_artist_info]
                         track_artists = [artist for artist in list_of_artists]
-                        
+                        print(track_artists)
+
+
                         # If artist name in tracks artist, add it to the list of songs to be added
                         if artist_name.upper() in track_artists:
                             uri = value["tracks"]["items"][i]["uri"]
@@ -564,22 +578,23 @@ if __name__ == '__main__':
             # Prints
             print("Unique featured artists for",artist_name,":\n", unique_featured_artists,'\n')    
             print("Songs not found for", artist_name + ":\n", not_found_tracks)            
-                
+
+    line_count = 88         
     #uris_list = get_uris_for_artist_tracks(artist_tracks_dict)
     print('\n\n\n')
-    print('=' * 120)
+    print('=' * line_count)
     queried_songs = [value for sublist in artist_tracks_dict.values() for value in sublist]
     print()
-    print('-' * 120)
+    print('-' * line_count)
     print("Tracks queried:\n", queried_songs)
-    print('-' * 120)
+    print('-' * line_count)
     print("Tracks returned:\n", tracks_list)
-    print('-' * 120)
+    print('-' * line_count)
     print("Difference (Queried vs Returned):\n",len(queried_songs), "vs", len(tracks_list))
-    print('-' * 120)
+    print('-' * line_count)
     print("Tracks not found:", not_found_tracks)
     print('\n\n')
-    print('=' * 120)
+    print('=' * line_count)
     exit()
 
 
