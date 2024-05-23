@@ -381,11 +381,13 @@ def get_uris_for_artist_tracks(artist_tracks_dict):
     conflicts = []
     index = 1
 
-    # Handles edge cases
+     # Handles edge cases
     known_tracks = {
     "BEEN BALLIN": "spotify:track:2EK77Jcm0Pvzd5nonAYOHX",
-    "OFF THE GRID": "spotify:track:2EK77Jcm0Pvzd5nonAYOHX",
+    "OFF THE GRID": "spotify:track:6LNoArVBBVZzUTUiAX2aKO",
     "MISS THE RAGE": "spotify:track:5n4FTCMefvyKUjeWumdaWv",
+    # "BANDIT":"spotify:track:7sTyAjxDXq9afwfSQy6D0s",
+    # "BANDIT":"spotify:track:7sTyAjxDXq9afwfSQy6D0s",
     # Add more known tracks here
     }
 
@@ -603,6 +605,8 @@ def created_playlist_with_setlist_api():
 
 
 # Main Function
+# Filter this function to only run the functions you want to test
+# IE if you only want to run the Setlist API functions, comment out the Spotify API functions using the '#' symbol
 if __name__ == '__main__':
     created_playlist_with_spotify_api()
     created_playlist_with_setlist_api()
