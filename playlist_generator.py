@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import spotipy
 import requests
@@ -374,6 +375,10 @@ def create_artist_tracks_dict_sl(artist_dict):
 
     return artist_tracks_dict
 
+# Remove punctuation and convert to uppercase
+def normalize(s):
+    return re.sub(r'[^\w\s]', '', s).upper().strip()
+
 # Creates a URIs list of all tracks by all artists
 def placeholder_function():
     pass
@@ -428,9 +433,9 @@ if __name__ == '__main__':
 
     #artist_tracks_dict = {'Travis Scott': ['FE!N', 'NO BYSTANDERS', 'SICKO MODE', 'I KNOW ?', 'goosebumps', 'BUTTERFLY EFFECT', 'Antidote', 'TOPIA TWINS', 'HYAENA', 'MODERN JAM', 'MY EYES', 'TELEKINESIS', 'Mo Bamba', 'Type Shit', 'Cinderella', 'lose', 'MELTDOWN', 'Trance', 'Bandit', 'Turn Yo Clic Up']}
 
-    #artist_tracks_dict = {'Playboi Carti': ['Sky', 'Stop Breathing', 'Rockstar Made', 'Off the Grid', 'On That Time', 'JumpOutTheHouse', 'Flex Up', 'No Sl33p', 'R.I.P.', 'Miss The Rage', 'Teen X', 'New N3on', 'F33l Lik3 Dyin', 'Control', 'Shoota', 'R.I.P Fredo', 'Location', 'Die4Guy', 'Wokeuplikethis*', 'FlatBed Freestyle']}
+    artist_tracks_dict = {'Playboi Carti': ['Sky', 'Stop Breathing', 'Rockstar Made', 'Off the Grid', 'On That Time', 'JumpOutTheHouse', 'Flex Up', 'No Sl33p', 'R.I.P.', 'Miss The Rage', 'Teen X', 'New N3on', 'F33l Lik3 Dyin', 'Control', 'Shoota', 'R.I.P Fredo', 'Location', 'Die4Guy', 'Wokeuplikethis*', 'FlatBed Freestyle']}
 
-    artist_tracks_dict = {'Chief Keef': ['Faneto', 'Love Sosa', 'War', 'Earned It', "Been Ballin'", "I Don't Like", 'Let Me See', 'Save That Shit', 'Hadouken', 'Kobe', 'Love No Thotties', 'Status', '3Hunna', 'Fool Ya', 'Close That Door', 'Hallelujah', "Hate Bein' Sober", 'Understand Me', 'Action Figures', 'Tec']}
+    #artist_tracks_dict = {'Chief Keef': ['Faneto', 'Love Sosa', 'War', 'Earned It', "Been Ballin'", "I Don't Like", 'Let Me See', 'Save That Shit', 'Hadouken', 'Kobe', 'Love No Thotties', 'Status', '3Hunna', 'Fool Ya', 'Close That Door', 'Hallelujah', "Hate Bein' Sober", 'Understand Me', 'Action Figures', 'Tec']}
     #artist_tracks_dict = {'Chief Keef': ['Fool ya', 'Faneto'],'Travis Scott': ['FE!N']}
 
     #artist_tracks_dict = create_artist_tracks_dict_sl(artist_dict)
@@ -469,7 +474,7 @@ if __name__ == '__main__':
                     ######################## Which is better??? ########################
 
                     #value = sp.search(q=song,offset=0, type="track")               #20 vs 17
-                    value = sp.search(q=query_2,offset=0, type="track")             #20 vs 18
+                    value = sp.search(q=query_2,offset=0, type="track")             #20 vs 18.5
                     #value = sp.search(q=query, limit=1,offset=0, type="track")
 
                     ####################################################################
@@ -477,15 +482,18 @@ if __name__ == '__main__':
                 #print(query_2)
                 #print(value)
                 for i in range(len(value["tracks"])):
-                    
+                    print(i)
+                    # List for all artists on one tracks
                     track_artists=[]
 
                     returned_song = value["tracks"]["items"][i]["name"]
                     #print(returned_song)
 
-                    if queried_song.upper() in returned_song.upper():
-
+                    if normalize(queried_song) in normalize(returned_song):
+                        
                         #print("Queried Song: ", queried_song, "\nReturned Song: ", returned_song,'\n')
+                        
+                        # Lists 
                         track_artist_info = value["tracks"]["items"][i]["artists"]
                         list_of_artists = [artist["name"].upper() for artist in track_artist_info]
                         track_artists = [artist for artist in list_of_artists]
@@ -522,51 +530,40 @@ if __name__ == '__main__':
                             uri = value["tracks"]["items"][i]["uri"]
                             track = value["tracks"]["items"][i]["name"]
 
-                            
-
                             uris_list.append(uri)
                             tracks_list.append(track)  
                             
-
+                        # Else if song not found
                         else:
                             track = queried_song.upper()
+                            #print(value)
+                            print("Track artists", track_artists)
                             track_artists = str([artist_name.upper()]) + " was not"
                             not_found_tracks.append(track)
                         
+                        # Prints
                         print(queried_song.upper(), "by", [artist_name.upper()], "queried")
                         print(track.upper(), "by", track_artists, "found")
+
+                        # Break once correct values found
                         break
 
                     else:
                         track = queried_song.upper()
                         track_artists = str([artist_name.upper()]) + " was not"
                         not_found_tracks.append(track)
+                        exit()
 
 
-                  
+                    # Break once correct values found
                     break
                
+            # Turn set into list
             unique_featured_artists = list(featured_artists)
+
+            # Prints
             print("Unique featured artists for",artist_name,":\n", unique_featured_artists,'\n')    
             print("Songs not found for", artist_name + ":\n", not_found_tracks)            
-
-                # # Tries to find the track based off of querying the name only with limit of 1
-                # try:
-                #     returned_song = value["tracks"]["items"][0]["name"]
-                #     returned_artists = value["tracks"]["items"][0]["artists"][0]["name"]
-
-                #     uri = value["tracks"]["items"][0]["uri"]
-                #     id = value["tracks"]["items"][0]["id"]
-                #     name = value["tracks"]["items"][0]["name"]
-
-                
-                #     if artist_name.lower() not in returned_artists.lower():
-
-                #         # Looks for top 10 tracks based on query of song and artist name
-                #         value = sp.search(q=f"track:{queried_song} {artist_name}", type="track")
-                # except:
-                #     print("oi")
-    
                 
     #uris_list = get_uris_for_artist_tracks(artist_tracks_dict)
     print('\n\n\n')
@@ -584,6 +581,19 @@ if __name__ == '__main__':
     print('\n\n')
     print('=' * 120)
     exit()
+
+
+
+    ## How do i write a function to reverse a string in python?
+    #def reverse_string(s):
+    #    return s[::-1]
+    #print(reverse_string("hello"))
+    
+
+
+
+
+    
 
     with open('json_tests/uris_list.txt', 'w') as f:
         f.write(f"{uris_list}\n")
