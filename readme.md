@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Summer Smash Music Festival Playlist Generator is a project designed to create two playlists for the Summer Smash Music Festival. The first playlist will consist of the top 10 tracks for each artist at the festival, sourced from the Spotify API. The second playlist will include all songs performed at each artist's most recent concert, obtained from the Setlist API. I would like to compare each playlist and see which one is more accurate regarding each artist's performance when I attend the festival.
+The Summer Smash Music Festival Playlist Generator is a project designed to create two playlists for the Summer Smash Music Festival. The first playlist will consist of the top 10 tracks for each artist at the festival, sourced from the Spotify API. The second playlist will include all songs performed at each artist's most recent concert, obtained from the Setlist API. I would like to compare each playlist and see which one is more accurate regarding the songs each artist performs.
 
 ## Features
 
@@ -17,6 +17,12 @@ The Summer Smash Music Festival Playlist Generator is a project designed to crea
 - `spotipy` Python library for Spotify API access
 - `requests` Python library for HTTP requests
 
+You can install the required Python libraries using the `requirements.txt` file:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Usage
 
 1. Clone the repository to your local machine:
@@ -26,8 +32,9 @@ git clone https://github.com/j-p-m-7/summer-smash-playlists.git
 ```
 
 2. Install the required Python libraries:
+
 ```bash
-pip install spotipy requests
+pip install -r requirements.txt
 ```
 
 3. Set up API keys for Spotify and Setlist:
