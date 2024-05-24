@@ -13,15 +13,11 @@ The Summer Smash Music Festival Playlist Generator is a project designed to crea
 
 ## Requirements
 
-- Python 3.x
+- Python 3.x (I used Python 3.11 but this should work with most versions)
 - `spotipy` Python library for Spotify API access
 - `requests` Python library for HTTP requests
 
-You can install the required Python libraries using the `requirements.txt` file:
-
-```bash
-pip install -r requirements.txt
-```
+You can install the required Python libraries using the `requirements.txt` file, as shown in the steps below.
 
 ## Usage
 
