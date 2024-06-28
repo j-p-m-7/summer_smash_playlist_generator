@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Summer Smash Music Festival Playlist Generator is a project designed to create two playlists for the Summer Smash Music Festival. The first playlist will consist of the top 10 tracks for each artist at the festival, sourced from the Spotify API. The second playlist will include the most common 10 songs performed at each artist's 20 most recent concerts, obtained from the Setlist API. I would like to compare each playlist and see which one is more accurate regarding the songs each artist performs.
+The Summer Smash Music Festival Playlist Generator is a project designed to create two playlists for the Summer Smash Music Festival. The first playlist will consist of the top 10 tracks for each artist at the festival, sourced from the Spotify API. The second playlist will include the top 10 most common songs performed at each artist's 20 most recent concerts, obtained from the Setlist API. I would like to compare each playlist and see which one is more accurate regarding the songs each artist performs.
 
 ## Features
 
