@@ -22,16 +22,7 @@ API_KEY = os.getenv('API_KEY')
 # Sets Setlist URL
 BASE_URL = "https://api.setlist.fm/rest/"
 
-# Sets user scopes
-#scopes = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-follow-modify user-follow-read user-read-playback-position user-top-read user-read-recently-played user-library-modify user-library-read user-read-email user-read-private user-soa-link user-soa-unlink soa-manage-entitlements soa-manage-partner soa-create-partner"
-scope = "user-read-currently-playing"
-scope = 'user-read-currently-playing user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private'
 
-# Initializes an instance of the Spotify class as an object
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
-                                               client_secret=CLIENT_SECRET,
-                                               redirect_uri=REDIRECT_URI,
-                                               scope=scope))
 
 # Testing
 def filter_json(value):
@@ -49,6 +40,64 @@ def filter_json(value):
     # Convert the filtered data dictionary back to a JSON string
     print(json.dumps(filtered_data, indent=4))
     ############################ Testing ############################
+# Testing
+
+
+
+
+# Reads the .env file and returns a dictionary of the environment variables
+def read_env_file():
+    env_vars = {}
+    if os.path.exists('.env'):
+        with open('.env', 'r') as env_file:
+            lines = env_file.readlines()
+            for line in lines:
+                key, value = line.strip().split('=', 1)
+                env_vars[key] = value
+    return env_vars
+
+# Sets up the API keys for Spotify and Setlist
+def setup_api_keys():
+    print("Setting up API keys for Spotify and Setlist.")
+
+    env_vars = read_env_file()
+
+    spotify_client_id = input(f"Enter your Spotify Client ID [{env_vars.get('SPOTIFY_CLIENT_ID', '')}]: ") or env_vars.get('SPOTIFY_CLIENT_ID', '')
+    spotify_client_secret = input(f"Enter your Spotify Client Secret [{env_vars.get('SPOTIFY_CLIENT_SECRET', '')}]: ") or env_vars.get('SPOTIFY_CLIENT_SECRET', '')
+    setlist_api_key = input(f"Enter your Setlist API Key [{env_vars.get('SETLIST_API_KEY', '')}]: ") or env_vars.get('SETLIST_API_KEY', '')
+
+    env_content = f"""
+    SPOTIFY_CLIENT_ID={spotify_client_id}
+    SPOTIFY_CLIENT_SECRET={spotify_client_secret}
+    SETLIST_API_KEY={setlist_api_key}
+        """
+
+    with open('.env', 'w') as env_file:
+        env_file.write(env_content.strip())
+
+    print(".env file created successfully with your API keys!")
+
+# Creates the Spotipy object instance
+def load_and_initialize_spotify():
+    load_dotenv()
+
+    # Gets Spotify credentials from .env
+    CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
+    CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
+    REDIRECT_URI = os.getenv('REDIRECT_URI')
+
+    # Sets user scopes
+    scope = 'user-read-currently-playing user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private'
+
+    # Initializes an instance of the Spotify class as an object
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
+                                                   client_secret=CLIENT_SECRET,
+                                                   redirect_uri=REDIRECT_URI,
+                                                   scope=scope))
+    return sp
+
+
+
 
 
 
@@ -110,14 +159,10 @@ def create_artist_tracks_dict(artist_dict):
         # For track in tracks, get uri and append to list
         for track in tracks:
             uri = track["uri"]
-            # value = sp.track(uri)["name"]
-            # print(value)
             tracks_list.append(uri)
 
         # Assign artist name and list of top 10 artist tracks as key value pairs in dictionary
         artist_tracks_dict[key] = tracks_list
-
-    print(artist_tracks_dict)
 
     return artist_tracks_dict
 
@@ -217,22 +262,16 @@ def get_artist_mbid(artist_name):
     
     if response.status_code == 200:
         data = response.json()
+
         if 'artists' in data and data['artists']:
             # Assuming the first result is the most relevant one
             artist = data['artists'][0]
-
-
-
             return artist['id']
+        
         else:
-
-
-
             return None
+        
     else:
-
-
-
         print(f"Error: {response.status_code}")
         return None
 
@@ -253,10 +292,6 @@ def get_artist_setlists(artist_mbid):
     }
 
     response = requests.get(url, headers=headers, params=params)
-
-    #print(response.status_code)
-
-
 
     return response.json()
 
@@ -345,26 +380,11 @@ def create_artist_tracks_dict_sl(artist_dict):
             # Sort the dictionary based on count of occurrences
             sorted_song_counts = dict(sorted(song_counts.items(), key=lambda x: x[1], reverse=True))
 
-            # Extract top 15-20 most common songs
-            top_songs = list(sorted_song_counts.keys())[:20]
-
-            #print("Here are the top", len(top_songs), "songs:\n", top_songs,'\n\n\n')
+            # Extract top 10 most common songs
+            top_songs = list(sorted_song_counts.keys())[:10]
 
             artist_tracks_dict[artist_name] = top_songs
 
-
-        #print('\n',artist_tracks_dict)
-
-    #print(json.dumps(artist_tracks_dict, indent=4))
-
-    # # Specify the filename
-    # filename = "artist_tracks_dict.json"
-
-    # # Write JSON data to file
-    # with open(filename, 'w') as file:
-    #     json.dump(artist_tracks_dict, file, indent=4)
-
-    #print(f"JSON data has been written to {filename}")
     print("Acquired all top 20 tracks for each of the", len(artist_tracks_dict.keys()), "artists")
 
     return artist_tracks_dict
@@ -382,16 +402,17 @@ def get_uris_for_artist_tracks(artist_tracks_dict):
     index = 1
 
      # Handles edge cases
+     # These tracks are on Spotify but are not by the artist listed in the JSON from the Setlist API
+     # TODO -- rework this to be more dynamic
     known_tracks = {
     "BEEN BALLIN": "spotify:track:2EK77Jcm0Pvzd5nonAYOHX",
     "OFF THE GRID": "spotify:track:6LNoArVBBVZzUTUiAX2aKO",
     "MISS THE RAGE": "spotify:track:5n4FTCMefvyKUjeWumdaWv",
-    # "BANDIT":"spotify:track:7sTyAjxDXq9afwfSQy6D0s",
-    # "BANDIT":"spotify:track:7sTyAjxDXq9afwfSQy6D0s",
     # Add more known tracks here
     }
 
     # Tracks that do not exist on Spotify
+    # TODO -- rework this to be more dynamic
     nonexistent_tracks = ['FOOL YA']
 
     # List to hold tracks that were not found
@@ -415,19 +436,11 @@ def get_uris_for_artist_tracks(artist_tracks_dict):
                 # Normalize queried song to be uppercase and without punctuation
                 normalized_song = normalize(queried_song)
 
-                # Debugging Prints
-                #print("\nQuerying", queried_song, "by", artist_name, "...")
-
                 # Queries
                 query_1 = f'track:{queried_song}, artist:{artist_name}'
                 query_2 = f'{queried_song} {artist_name}'
                 song = f"track:{queried_song}"
 
-
-                #value = sp.search(q=f"track:{queried_song}, artist:{artist_name}", limit=1,offset=0)
-                #value = sp.search(q=query, limit=1,offset=0, type="track")
-
-                
                 # If song is in known tracks, add it to the list
                 # This skips the API call and saves time
                 # Use this for songs that are in the API but don't have the correct artist listed
@@ -445,19 +458,9 @@ def get_uris_for_artist_tracks(artist_tracks_dict):
                         artist_not_found_tracks.append(queried_song)
                         continue  # Skip to the next track
 
-        
+                # Else if song is not in known tracks or nonexistent tracks, query the Spotify API
                 else:
-                    ######################## Which is better??? ########################
-
-                    #value = sp.search(q=song,offset=0, type="track")               #20 vs 17
-                    value = sp.search(q=query_2,offset=0, type="track")             #20 vs 18.5
-                    #value = sp.search(q=query, limit=1,offset=0, type="track")
-
-                    ####################################################################
-                    
-                # Debugging prints
-                #print(query_2)
-                #print(value)
+                    value = sp.search(q=query_2,offset=0, type="track")            
 
                 # Loop through tracks
                 for i in range(len(value["tracks"])):
@@ -512,15 +515,9 @@ def get_uris_for_artist_tracks(artist_tracks_dict):
                         # Else if song not found
                         else:
                             track = queried_song.upper()
-                            # print(value)
-                            # print("Track artists", track_artists)
                             track_artists = str([artist_name.upper()]) + " was not"
                             artist_not_found_tracks.append(track)
                         
-                        # Debugging Prints
-                        # print(queried_song.upper(), "by", [artist_name.upper()], "queried")
-                        # print(track.upper(), "by", track_artists, "found")
-
                         # Break once correct values found
                         break
 
@@ -543,27 +540,16 @@ def get_uris_for_artist_tracks(artist_tracks_dict):
         # Append to list of tracks not found
         not_found_tracks.append(artist_not_found_tracks)
 
-    # Debugging prints
-    # line_count = 88         
-    # print('\n\n\n')
-    # print('=' * line_count)
-    # queried_songs = [value for sublist in artist_tracks_dict.values() for value in sublist]
-    # print()
-    # print('-' * line_count)
-    # print("Tracks queried:\n", queried_songs)
-    # print('-' * line_count)
-    # print("Tracks returned:\n", tracks_list)
-    # print('-' * line_count)
-    # print("Difference (Queried vs Returned):\n",len(queried_songs), "vs", len(tracks_list))
-    # print('-' * line_count)
-    # print("Tracks not found:", not_found_tracks)
-    # print('\n')
-    # print('=' * line_count)
-
     return uris_list
 
 # Runs all relevant Setlist API functions
 def created_playlist_with_setlist_api():
+
+    # Gets Setlist credentials from .env
+    API_KEY = os.getenv('SETLIST_API_KEY')
+    # Sets Setlist URL
+    BASE_URL = "https://api.setlist.fm/rest/"
+
 
     artists = get_artists_from_txt_file()
     print("Loaded", len(artists),"from text file.",'\n')
@@ -584,10 +570,6 @@ def created_playlist_with_setlist_api():
     uris_list = get_uris_for_artist_tracks(artist_tracks_dict)
     print("Created list of URIs for all tracks by all artists\n")
 
-    # Debugging lines
-    # with open('json_tests/uris_list.txt', 'w') as f:
-    #     f.write(f"{uris_list}\n")
-        
     # Creates a playlist with the name "Summer Smash - Setlist API" and returns the id
     playlist_id = create_playlist("Summer Smash - Setlist API")
     print("Created playlist...\n")
@@ -608,5 +590,14 @@ def created_playlist_with_setlist_api():
 # Filter this function to only run the functions you want to test
 # IE if you only want to run the Setlist API functions, comment out the Spotify API functions using the '#' symbol
 if __name__ == '__main__':
+
+    # Sets up API keys
+    # TODO - update this function to be more dynamic
+    # setup_api_keys()
+    # Initializes Spotify object
+    sp = load_and_initialize_spotify()
+
+    # Creates playlist with Spotify API
     created_playlist_with_spotify_api()
+    # Creates playlist with Setlist API
     created_playlist_with_setlist_api()
